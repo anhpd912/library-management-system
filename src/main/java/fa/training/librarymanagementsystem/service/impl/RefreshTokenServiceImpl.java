@@ -38,6 +38,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         // Revoke the old token before issuing a new one
         refreshTokenRepository.deleteByUser(user);
+        refreshTokenRepository.flush(); // Ensure deletion is committed before saving new token
 
         return refreshTokenRepository.save(RefreshToken.builder()
                 .user(user)
