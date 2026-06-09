@@ -4,8 +4,11 @@ import fa.training.librarymanagementsystem.config.JwtUtil;
 import fa.training.librarymanagementsystem.dto.AuthResponse;
 import fa.training.librarymanagementsystem.dto.LoginRequest;
 import fa.training.librarymanagementsystem.dto.RefreshTokenRequest;
+import fa.training.librarymanagementsystem.dto.RegisterRequest;
 import fa.training.librarymanagementsystem.entity.RefreshToken;
+import fa.training.librarymanagementsystem.entity.Role;
 import fa.training.librarymanagementsystem.entity.User;
+import fa.training.librarymanagementsystem.exception.ResourceAlreadyExistsException;
 import fa.training.librarymanagementsystem.exception.ResourceNotFoundException;
 import fa.training.librarymanagementsystem.repository.UserRepository;
 import fa.training.librarymanagementsystem.service.AuthService;
@@ -15,6 +18,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /** Handles credential verification, JWT issuance, token refresh, and logout. */
@@ -27,6 +31,21 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public void register(RegisterRequest request) {
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new ResourceAlreadyExistsException("Username already taken: " + request.getUsername());
+        }
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(Role.READER);
+
+        userRepository.save(user);
+    }
 
     /**
      * Authenticates credentials and returns an access token + refresh token pair.

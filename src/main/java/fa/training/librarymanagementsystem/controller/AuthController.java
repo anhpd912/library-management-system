@@ -4,8 +4,10 @@ import fa.training.librarymanagementsystem.dto.ApiResponse;
 import fa.training.librarymanagementsystem.dto.AuthResponse;
 import fa.training.librarymanagementsystem.dto.LoginRequest;
 import fa.training.librarymanagementsystem.dto.RefreshTokenRequest;
+import fa.training.librarymanagementsystem.dto.RegisterRequest;
 import fa.training.librarymanagementsystem.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,12 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<Void>> register(@RequestBody RegisterRequest request) {
+        authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("User registered successfully", null));
+    }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest request) {

@@ -20,6 +20,12 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(e.getMessage()));
     }
 
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResourceExists(ResourceAlreadyExistsException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(e.getMessage()));
+    }
+
     /** 409 Conflict: all copies of the requested book are currently borrowed. */
     @ExceptionHandler(BookNotAvailableException.class)
     public ResponseEntity<ApiResponse<Void>> handleBookNotAvailable(BookNotAvailableException e) {
