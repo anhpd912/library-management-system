@@ -12,4 +12,5 @@ public interface BorrowService {
     BorrowRecordResponse returnBook(ReturnRequest request);
     PageResponse<BorrowRecordResponse> getAllBorrowRecords(BorrowRecordFilterRequest filter, Pageable pageable);
     BorrowRecordResponse getBorrowRecordById(Long id);
+    PageResponse<BorrowRecordResponse> getMyBorrowRecords(String username, Pageable pageable);
 }

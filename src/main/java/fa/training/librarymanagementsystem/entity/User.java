@@ -28,7 +28,12 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    enum Role {
+    /** False = account is deactivated; JWT is still valid until expiry but login is blocked. */
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean active = true;
+
+    public enum Role {
         ADMIN, READER
     }
 }

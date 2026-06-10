@@ -38,10 +38,12 @@ public class AuthServiceImpl implements AuthService {
             throw new ResourceAlreadyExistsException("Username already taken: " + request.getUsername());
         }
 
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.READER);
+        User user = User.builder()
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(User.Role.READER)
+                .active(true)
+                .build();
 
         userRepository.save(user);
     }

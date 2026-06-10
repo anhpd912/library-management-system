@@ -29,9 +29,9 @@ public class DataSeeder implements CommandLineRunner {
         if (userRepository.count() > 0) return;
 
         userRepository.saveAll(List.of(
-                User.builder().username("admin").password(passwordEncoder.encode("admin123")).role(Role.ADMIN).build(),
-                User.builder().username("reader1").password(passwordEncoder.encode("reader123")).role(Role.READER).build(),
-                User.builder().username("reader2").password(passwordEncoder.encode("reader123")).role(Role.READER).build()
+                User.builder().username("admin").password(passwordEncoder.encode("admin123")).role(User.Role.ADMIN).active(true).build(),
+                User.builder().username("reader1").password(passwordEncoder.encode("reader123")).role(User.Role.READER).active(true).build(),
+                User.builder().username("reader2").password(passwordEncoder.encode("reader123")).role(User.Role.READER).active(true).build()
         ));
 
         Book cleanCode = bookRepository.save(
@@ -42,11 +42,11 @@ public class DataSeeder implements CommandLineRunner {
                 Book.builder().title("Domain-Driven Design").author("Eric Evans").isbn("9780321125217").build());
 
         bookCopyRepository.saveAll(List.of(
-                BookCopy.builder().book(cleanCode).status(CopyStatus.AVAILABLE).build(),
-                BookCopy.builder().book(cleanCode).status(CopyStatus.AVAILABLE).build(),
-                BookCopy.builder().book(springInAction).status(CopyStatus.AVAILABLE).build(),
-                BookCopy.builder().book(springInAction).status(CopyStatus.AVAILABLE).build(),
-                BookCopy.builder().book(ddd).status(CopyStatus.AVAILABLE).build()
+                BookCopy.builder().book(cleanCode).status(BookCopy.CopyStatus.AVAILABLE).build(),
+                BookCopy.builder().book(cleanCode).status(BookCopy.CopyStatus.AVAILABLE).build(),
+                BookCopy.builder().book(springInAction).status(BookCopy.CopyStatus.AVAILABLE).build(),
+                BookCopy.builder().book(springInAction).status(BookCopy.CopyStatus.AVAILABLE).build(),
+                BookCopy.builder().book(ddd).status(BookCopy.CopyStatus.AVAILABLE).build()
         ));
     }
 }

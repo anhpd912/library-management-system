@@ -35,10 +35,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                        // Only admins may add books; reading the catalog is open to any authenticated user
                         .requestMatchers(HttpMethod.POST, "/api/books").hasRole("ADMIN")
-                        // Borrow record management is admin-only
+                        .requestMatchers(HttpMethod.POST, "/api/borrow").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/return").hasRole("ADMIN")
+                        // Reader can view own history; all other borrow-record endpoints are admin-only
+                        .requestMatchers("/api/borrow-records/my").authenticated()
                         .requestMatchers("/api/borrow-records/**").hasRole("ADMIN")
+                        .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        .requestMatchers("/api/stats/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 // Return ApiResponse-shaped JSON instead of Spring's default redirect on 401

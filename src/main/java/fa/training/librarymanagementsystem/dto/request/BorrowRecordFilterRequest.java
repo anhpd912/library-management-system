@@ -1,5 +1,6 @@
 package fa.training.librarymanagementsystem.dto.request;
 
+import fa.training.librarymanagementsystem.entity.BorrowRecord;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,7 @@ import java.time.LocalDate;
 public class BorrowRecordFilterRequest {
     private Long userId;
     private Long bookId;
-    private BorrowStatus status;
+    private BorrowRecord.BorrowStatus status;
     private LocalDate borrowDateFrom;
     private LocalDate borrowDateTo;
 }

@@ -1,7 +1,7 @@
 package fa.training.librarymanagementsystem.dto.response;
 
 import fa.training.librarymanagementsystem.entity.Book;
-import fa.training.librarymanagementsystem.entity.CopyStatus;
+import fa.training.librarymanagementsystem.entity.BookCopy;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,7 +17,7 @@ public class BookResponse {
     /** Used after createBook — copies are already loaded in-memory, no extra query needed. */
     public static BookResponse from(Book book) {
         long available = book.getCopies().stream()
-                .filter(c -> c.getStatus() == CopyStatus.AVAILABLE)
+                .filter(c -> c.getStatus() == BookCopy.CopyStatus.AVAILABLE)
                 .count();
         return from(book, available);
     }

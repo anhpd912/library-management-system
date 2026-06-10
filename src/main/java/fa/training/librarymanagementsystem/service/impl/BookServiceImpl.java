@@ -6,7 +6,6 @@ import fa.training.librarymanagementsystem.dto.request.CreateBookRequest;
 import fa.training.librarymanagementsystem.dto.response.PageResponse;
 import fa.training.librarymanagementsystem.entity.Book;
 import fa.training.librarymanagementsystem.entity.BookCopy;
-import fa.training.librarymanagementsystem.entity.CopyStatus;
 import fa.training.librarymanagementsystem.repository.BookCopyRepository;
 import fa.training.librarymanagementsystem.repository.BookRepository;
 import fa.training.librarymanagementsystem.repository.specification.BookSpecification;
@@ -47,7 +46,7 @@ public class BookServiceImpl implements BookService {
         for (int i = 0; i < request.getNumberOfCopies(); i++) {
             copies.add(BookCopy.builder()
                     .book(book)
-                    .status(CopyStatus.AVAILABLE)
+                    .status(BookCopy.CopyStatus.AVAILABLE)
                     .build());
         }
         // Add saved copies to the in-memory collection so BookResponse.from() counts them correctly
@@ -73,7 +72,7 @@ public class BookServiceImpl implements BookService {
 
         List<BookResponse> content = page.getContent().stream()
                 .map(book -> BookResponse.from(book,
-                        bookCopyRepository.countByBookIdAndStatus(book.getId(), CopyStatus.AVAILABLE)))
+                        bookCopyRepository.countByBookIdAndStatus(book.getId(), BookCopy.CopyStatus.AVAILABLE)))
                 .toList();
 
         return PageResponse.from(page, content);

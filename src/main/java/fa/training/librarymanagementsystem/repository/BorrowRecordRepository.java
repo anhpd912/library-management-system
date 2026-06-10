@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long>, JpaSpecificationExecutor<BorrowRecord> {
@@ -28,4 +30,7 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
     @Override
     @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book"})
     Page<BorrowRecord> findAll(@Nullable Specification<BorrowRecord> spec, Pageable pageable);
+
+    @Query("SELECT COUNT(r) FROM BorrowRecord r WHERE r.status = 'BORROWING' AND r.dueDate < :today")
+    long countOverdue(@Param("today") LocalDate today);
 }

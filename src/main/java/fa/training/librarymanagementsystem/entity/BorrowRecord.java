@@ -33,14 +33,19 @@ public class BorrowRecord {
     @Column(nullable = false)
     private LocalDate borrowDate;
 
-    /** Null until the book is returned. */
+    /** Due date = borrowDate + configured period (default 14 days). */
+    private LocalDate dueDate;
+
+    /**
+     * Null until the book is returned.
+     */
     private LocalDate returnDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BorrowStatus status;
 
-    enum BorrowStatus {
+    public enum BorrowStatus {
         BORROWING, RETURNED
     }
 

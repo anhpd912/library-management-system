@@ -26,7 +26,7 @@ public class BorrowRecordSpecification {
                 cb.equal(root.get("bookCopy").get("book").get("id"), bookId);
     }
 
-    public static Specification<BorrowRecord> hasStatus(BorrowStatus status) {
+    public static Specification<BorrowRecord> hasStatus(BorrowRecord.BorrowStatus status) {
         return (root, query, cb) ->
                 status == null ? null :
                 cb.equal(root.get("status"), status);
@@ -42,5 +42,11 @@ public class BorrowRecordSpecification {
         return (root, query, cb) ->
                 date == null ? null :
                 cb.lessThanOrEqualTo(root.get("borrowDate"), date);
+    }
+
+    public static Specification<BorrowRecord> hasUsername(String username) {
+        return (root, query, cb) ->
+                username == null ? null :
+                cb.equal(root.get("user").get("username"), username);
     }
 }

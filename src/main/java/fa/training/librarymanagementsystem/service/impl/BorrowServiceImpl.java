@@ -15,6 +15,7 @@ import fa.training.librarymanagementsystem.repository.specification.BorrowRecord
 import fa.training.librarymanagementsystem.repository.UserRepository;
 import fa.training.librarymanagementsystem.service.BorrowService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,6 +34,9 @@ public class BorrowServiceImpl implements BorrowService {
     private final BookCopyRepository bookCopyRepository;
     private final BorrowRecordRepository borrowRecordRepository;
 
+    @Value("${app.borrow.period-days:14}")
+    private int borrowPeriodDays;
+
     /**
      * Borrows a book copy for a user.
      * The status update and record creation are atomic — if saving the record fails,
@@ -45,17 +49,19 @@ public class BorrowServiceImpl implements BorrowService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + request.getUserId()));
 
         // Pick any available copy; the specific copy does not matter to the borrower
-        BookCopy copy = bookCopyRepository.findFirstByBookIdAndStatus(request.getBookId(), CopyStatus.AVAILABLE)
+        BookCopy copy = bookCopyRepository.findFirstByBookIdAndStatus(request.getBookId(), BookCopy.CopyStatus.AVAILABLE)
                 .orElseThrow(() -> new BookNotAvailableException("No available copy for book id: " + request.getBookId()));
 
-        copy.setStatus(CopyStatus.BORROWED);
+        copy.setStatus(BookCopy.CopyStatus.BORROWED);
 
+        LocalDate today = LocalDate.now();
         BorrowRecord record = BorrowRecord.builder()
                 .user(user)
                 .bookCopy(copy)
-                .borrowDate(LocalDate.now())
+                .borrowDate(today)
+                .dueDate(today.plusDays(borrowPeriodDays))
                 .returnDate(null)
-                .status(BorrowStatus.BORROWING)
+                .status(BorrowRecord.BorrowStatus.BORROWING)
                 .build();
 
         return BorrowRecordResponse.from(borrowRecordRepository.save(record));
@@ -72,13 +78,13 @@ public class BorrowServiceImpl implements BorrowService {
         BorrowRecord record = borrowRecordRepository.findByIdWithDetails(request.getBorrowRecordId())
                 .orElseThrow(() -> new ResourceNotFoundException("BorrowRecord not found: " + request.getBorrowRecordId()));
 
-        if (record.getStatus() == BorrowStatus.RETURNED) {
+        if (record.getStatus() == BorrowRecord.BorrowStatus.RETURNED) {
             throw new AlreadyReturnedException("BorrowRecord " + request.getBorrowRecordId() + " already returned");
         }
 
-        record.setStatus(BorrowStatus.RETURNED);
+        record.setStatus(BorrowRecord.BorrowStatus.RETURNED);
         record.setReturnDate(LocalDate.now());
-        record.getBookCopy().setStatus(CopyStatus.AVAILABLE);
+        record.getBookCopy().setStatus(BookCopy.CopyStatus.AVAILABLE);
 
         return BorrowRecordResponse.from(borrowRecordRepository.save(record));
     }
@@ -111,5 +117,17 @@ public class BorrowServiceImpl implements BorrowService {
         return BorrowRecordResponse.from(
                 borrowRecordRepository.findByIdWithDetails(id)
                         .orElseThrow(() -> new ResourceNotFoundException("BorrowRecord not found: " + id)));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<BorrowRecordResponse> getMyBorrowRecords(String username, Pageable pageable) {
+        Specification<BorrowRecord> spec = Specification
+                .where(BorrowRecordSpecification.hasUsername(username));
+        Page<BorrowRecord> page = borrowRecordRepository.findAll(spec, pageable);
+        List<BorrowRecordResponse> content = page.getContent().stream()
+                .map(BorrowRecordResponse::from)
+                .toList();
+        return PageResponse.from(page, content);
     }
 }

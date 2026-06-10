@@ -27,7 +27,7 @@ public class BookCopy {
     @Column(nullable = false)
     private CopyStatus status;
 
-    enum CopyStatus {
+   public enum CopyStatus {
         AVAILABLE, BORROWED
     }
 }
