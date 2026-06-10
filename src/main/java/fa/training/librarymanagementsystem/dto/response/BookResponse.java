@@ -1,4 +1,4 @@
-package fa.training.librarymanagementsystem.dto;
+package fa.training.librarymanagementsystem.dto.response;
 
 import fa.training.librarymanagementsystem.entity.Book;
 import fa.training.librarymanagementsystem.entity.CopyStatus;

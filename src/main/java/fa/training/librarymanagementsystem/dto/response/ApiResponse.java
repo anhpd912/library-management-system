@@ -1,4 +1,4 @@
-package fa.training.librarymanagementsystem.dto;
+package fa.training.librarymanagementsystem.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package fa.training.librarymanagementsystem.repository;
+package fa.training.librarymanagementsystem.repository.specification;
 
 import fa.training.librarymanagementsystem.entity.Book;
 import org.springframework.data.jpa.domain.Specification;

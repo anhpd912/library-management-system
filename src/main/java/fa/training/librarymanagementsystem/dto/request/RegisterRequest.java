@@ -1,9 +1,9 @@
-package fa.training.librarymanagementsystem.dto;
+package fa.training.librarymanagementsystem.dto.request;
 
 import lombok.Data;
 
 @Data
-public class LoginRequest {
+public class RegisterRequest {
     private String username;
     private String password;
 }

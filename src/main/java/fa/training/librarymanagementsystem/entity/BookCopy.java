@@ -3,7 +3,9 @@ package fa.training.librarymanagementsystem.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-/** Represents a single physical copy of a Book. Status reflects current availability. */
+/**
+ * Represents a single physical copy of a Book. Status reflects current availability.
+ */
 @Entity
 @Table(name = "book_copies")
 @Getter
@@ -24,4 +26,8 @@ public class BookCopy {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CopyStatus status;
+
+    enum CopyStatus {
+        AVAILABLE, BORROWED
+    }
 }

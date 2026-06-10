@@ -1,7 +1,6 @@
-package fa.training.librarymanagementsystem.dto;
+package fa.training.librarymanagementsystem.dto.response;
 
 import fa.training.librarymanagementsystem.entity.BorrowRecord;
-import fa.training.librarymanagementsystem.entity.BorrowStatus;
 import lombok.Builder;
 import lombok.Getter;
 

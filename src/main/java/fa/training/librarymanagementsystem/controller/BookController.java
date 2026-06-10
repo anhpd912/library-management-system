@@ -1,10 +1,10 @@
 package fa.training.librarymanagementsystem.controller;
 
-import fa.training.librarymanagementsystem.dto.ApiResponse;
-import fa.training.librarymanagementsystem.dto.BookFilterRequest;
-import fa.training.librarymanagementsystem.dto.BookResponse;
-import fa.training.librarymanagementsystem.dto.CreateBookRequest;
-import fa.training.librarymanagementsystem.dto.PageResponse;
+import fa.training.librarymanagementsystem.dto.response.ApiResponse;
+import fa.training.librarymanagementsystem.dto.request.BookFilterRequest;
+import fa.training.librarymanagementsystem.dto.response.BookResponse;
+import fa.training.librarymanagementsystem.dto.request.CreateBookRequest;
+import fa.training.librarymanagementsystem.dto.response.PageResponse;
 import fa.training.librarymanagementsystem.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;

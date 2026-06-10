@@ -1,10 +1,9 @@
 package fa.training.librarymanagementsystem.controller;
 
-import fa.training.librarymanagementsystem.dto.ApiResponse;
-import fa.training.librarymanagementsystem.dto.BorrowRecordFilterRequest;
-import fa.training.librarymanagementsystem.dto.BorrowRecordResponse;
-import fa.training.librarymanagementsystem.dto.PageResponse;
-import fa.training.librarymanagementsystem.entity.BorrowStatus;
+import fa.training.librarymanagementsystem.dto.response.ApiResponse;
+import fa.training.librarymanagementsystem.dto.request.BorrowRecordFilterRequest;
+import fa.training.librarymanagementsystem.dto.response.BorrowRecordResponse;
+import fa.training.librarymanagementsystem.dto.response.PageResponse;
 import fa.training.librarymanagementsystem.service.BorrowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;

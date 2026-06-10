@@ -1,10 +1,10 @@
 package fa.training.librarymanagementsystem.service;
 
-import fa.training.librarymanagementsystem.dto.BorrowRecordFilterRequest;
-import fa.training.librarymanagementsystem.dto.BorrowRecordResponse;
-import fa.training.librarymanagementsystem.dto.BorrowRequest;
-import fa.training.librarymanagementsystem.dto.PageResponse;
-import fa.training.librarymanagementsystem.dto.ReturnRequest;
+import fa.training.librarymanagementsystem.dto.request.BorrowRecordFilterRequest;
+import fa.training.librarymanagementsystem.dto.response.BorrowRecordResponse;
+import fa.training.librarymanagementsystem.dto.request.BorrowRequest;
+import fa.training.librarymanagementsystem.dto.response.PageResponse;
+import fa.training.librarymanagementsystem.dto.request.ReturnRequest;
 import org.springframework.data.domain.Pageable;
 
 public interface BorrowService {

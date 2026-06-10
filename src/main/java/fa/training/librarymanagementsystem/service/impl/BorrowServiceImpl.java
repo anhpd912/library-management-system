@@ -1,16 +1,17 @@
 package fa.training.librarymanagementsystem.service.impl;
 
-import fa.training.librarymanagementsystem.dto.BorrowRecordFilterRequest;
-import fa.training.librarymanagementsystem.dto.BorrowRecordResponse;
-import fa.training.librarymanagementsystem.dto.BorrowRequest;
-import fa.training.librarymanagementsystem.dto.PageResponse;
-import fa.training.librarymanagementsystem.dto.ReturnRequest;
+import fa.training.librarymanagementsystem.dto.request.BorrowRecordFilterRequest;
+import fa.training.librarymanagementsystem.dto.response.BorrowRecordResponse;
+import fa.training.librarymanagementsystem.dto.request.BorrowRequest;
+import fa.training.librarymanagementsystem.dto.response.PageResponse;
+import fa.training.librarymanagementsystem.dto.request.ReturnRequest;
 import fa.training.librarymanagementsystem.entity.*;
+import fa.training.librarymanagementsystem.exception.AlreadyReturnedException;
 import fa.training.librarymanagementsystem.exception.BookNotAvailableException;
 import fa.training.librarymanagementsystem.exception.ResourceNotFoundException;
 import fa.training.librarymanagementsystem.repository.BookCopyRepository;
 import fa.training.librarymanagementsystem.repository.BorrowRecordRepository;
-import fa.training.librarymanagementsystem.repository.BorrowRecordSpecification;
+import fa.training.librarymanagementsystem.repository.specification.BorrowRecordSpecification;
 import fa.training.librarymanagementsystem.repository.UserRepository;
 import fa.training.librarymanagementsystem.service.BorrowService;
 import lombok.RequiredArgsConstructor;
@@ -70,6 +71,10 @@ public class BorrowServiceImpl implements BorrowService {
         // Use JOIN FETCH query to avoid LazyInitializationException when mapping to DTO
         BorrowRecord record = borrowRecordRepository.findByIdWithDetails(request.getBorrowRecordId())
                 .orElseThrow(() -> new ResourceNotFoundException("BorrowRecord not found: " + request.getBorrowRecordId()));
+
+        if (record.getStatus() == BorrowStatus.RETURNED) {
+            throw new AlreadyReturnedException("BorrowRecord " + request.getBorrowRecordId() + " already returned");
+        }
 
         record.setStatus(BorrowStatus.RETURNED);
         record.setReturnDate(LocalDate.now());

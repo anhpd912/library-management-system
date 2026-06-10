@@ -1,12 +1,11 @@
 package fa.training.librarymanagementsystem.service.impl;
 
 import fa.training.librarymanagementsystem.config.JwtUtil;
-import fa.training.librarymanagementsystem.dto.AuthResponse;
-import fa.training.librarymanagementsystem.dto.LoginRequest;
-import fa.training.librarymanagementsystem.dto.RefreshTokenRequest;
-import fa.training.librarymanagementsystem.dto.RegisterRequest;
+import fa.training.librarymanagementsystem.dto.response.AuthResponse;
+import fa.training.librarymanagementsystem.dto.request.LoginRequest;
+import fa.training.librarymanagementsystem.dto.request.RefreshTokenRequest;
+import fa.training.librarymanagementsystem.dto.request.RegisterRequest;
 import fa.training.librarymanagementsystem.entity.RefreshToken;
-import fa.training.librarymanagementsystem.entity.Role;
 import fa.training.librarymanagementsystem.entity.User;
 import fa.training.librarymanagementsystem.exception.ResourceAlreadyExistsException;
 import fa.training.librarymanagementsystem.exception.ResourceNotFoundException;

@@ -1,7 +1,6 @@
-package fa.training.librarymanagementsystem.repository;
+package fa.training.librarymanagementsystem.repository.specification;
 
 import fa.training.librarymanagementsystem.entity.BorrowRecord;
-import fa.training.librarymanagementsystem.entity.BorrowStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;

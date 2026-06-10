@@ -1,6 +1,6 @@
 package fa.training.librarymanagementsystem.exception;
 
-import fa.training.librarymanagementsystem.dto.ApiResponse;
+import fa.training.librarymanagementsystem.dto.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -22,6 +22,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     public ResponseEntity<ApiResponse<Void>> handleResourceExists(ResourceAlreadyExistsException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(e.getMessage()));
+    }
+
+    /** 409 Conflict: borrow record already has RETURNED status — duplicate return attempt. */
+    @ExceptionHandler(AlreadyReturnedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAlreadyReturned(AlreadyReturnedException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiResponse.error(e.getMessage()));
     }

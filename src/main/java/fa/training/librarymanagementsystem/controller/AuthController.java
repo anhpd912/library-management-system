@@ -1,10 +1,10 @@
 package fa.training.librarymanagementsystem.controller;
 
-import fa.training.librarymanagementsystem.dto.ApiResponse;
-import fa.training.librarymanagementsystem.dto.AuthResponse;
-import fa.training.librarymanagementsystem.dto.LoginRequest;
-import fa.training.librarymanagementsystem.dto.RefreshTokenRequest;
-import fa.training.librarymanagementsystem.dto.RegisterRequest;
+import fa.training.librarymanagementsystem.dto.response.ApiResponse;
+import fa.training.librarymanagementsystem.dto.response.AuthResponse;
+import fa.training.librarymanagementsystem.dto.request.LoginRequest;
+import fa.training.librarymanagementsystem.dto.request.RefreshTokenRequest;
+import fa.training.librarymanagementsystem.dto.request.RegisterRequest;
 import fa.training.librarymanagementsystem.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

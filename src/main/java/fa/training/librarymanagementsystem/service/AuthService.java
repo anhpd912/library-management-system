@@ -1,9 +1,9 @@
 package fa.training.librarymanagementsystem.service;
 
-import fa.training.librarymanagementsystem.dto.AuthResponse;
-import fa.training.librarymanagementsystem.dto.LoginRequest;
-import fa.training.librarymanagementsystem.dto.RefreshTokenRequest;
-import fa.training.librarymanagementsystem.dto.RegisterRequest;
+import fa.training.librarymanagementsystem.dto.response.AuthResponse;
+import fa.training.librarymanagementsystem.dto.request.LoginRequest;
+import fa.training.librarymanagementsystem.dto.request.RefreshTokenRequest;
+import fa.training.librarymanagementsystem.dto.request.RegisterRequest;
 
 public interface AuthService {
     void register(RegisterRequest request);
