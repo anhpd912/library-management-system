@@ -34,6 +34,7 @@ public class FineScheduler {
         for (BorrowRecord record : overdue) {
             long days = ChronoUnit.DAYS.between(record.getDueDate(), today);
             record.setFineAmount(days * finePerDay);
+            record.setStatus(BorrowRecord.BorrowStatus.OVERDUE);
         }
         borrowRecordRepository.saveAll(overdue);
         log.info("Fine scheduler: updated {} overdue records (fine/day: {} VND)", overdue.size(), finePerDay);

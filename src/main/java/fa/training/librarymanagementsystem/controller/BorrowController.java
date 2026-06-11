@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 /** Handles borrow and return transactions. */
 @RestController
 @RequestMapping("/api")
@@ -27,5 +29,12 @@ public class BorrowController {
     @PostMapping("/return")
     public ResponseEntity<ApiResponse<BorrowRecordResponse>> returnBook(@RequestBody ReturnRequest request) {
         return ResponseEntity.ok(ApiResponse.success("Book returned successfully", borrowService.returnBook(request)));
+    }
+
+    @PostMapping("/renew")
+    public ResponseEntity<ApiResponse<BorrowRecordResponse>> renewBook(
+            @RequestBody ReturnRequest request, Principal principal) {
+        return ResponseEntity.ok(ApiResponse.success("Renewal successful",
+                borrowService.renewBook(request.getBorrowRecordId(), principal.getName())));
     }
 }

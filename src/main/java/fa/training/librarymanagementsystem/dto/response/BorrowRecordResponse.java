@@ -22,12 +22,14 @@ public class BorrowRecordResponse {
     private boolean overdue;
     /** Persisted fine in VND: updated daily by FineScheduler; set at return time for RETURNED records. */
     private long fineAmount;
+    /** Number of renewals used. Max renewals configured via app.borrow.max-renewals (default 2). */
+    private int renewCount;
 
     public static BorrowRecordResponse from(BorrowRecord record) {
         LocalDate due = record.getDueDate();
-        boolean overdue = due != null
-                && record.getStatus() == BorrowRecord.BorrowStatus.BORROWING
-                && LocalDate.now().isAfter(due);
+        boolean overdue = record.getStatus() == BorrowRecord.BorrowStatus.OVERDUE
+                || (due != null && record.getStatus() == BorrowRecord.BorrowStatus.BORROWING
+                    && LocalDate.now().isAfter(due));
 
         return BorrowRecordResponse.builder()
                 .id(record.getId())
@@ -41,6 +43,7 @@ public class BorrowRecordResponse {
                 .status(record.getStatus())
                 .overdue(overdue)
                 .fineAmount(record.getFineAmount())
+                .renewCount(record.getRenewCount())
                 .build();
     }
 }

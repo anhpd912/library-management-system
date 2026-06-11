@@ -49,8 +49,15 @@ public class BorrowRecord {
     @Column(columnDefinition = "BIGINT DEFAULT 0")
     private long fineAmount;
 
+    /** Number of times this loan has been renewed. Capped at app.borrow.max-renewals (default 2). */
+    @Column(columnDefinition = "INT DEFAULT 0")
+    private int renewCount;
+
     public enum BorrowStatus {
-        BORROWING, RETURNED
+        BORROWING,
+        /** Past dueDate and not yet returned. Set automatically by FineScheduler at midnight. */
+        OVERDUE,
+        RETURNED
     }
 
 }

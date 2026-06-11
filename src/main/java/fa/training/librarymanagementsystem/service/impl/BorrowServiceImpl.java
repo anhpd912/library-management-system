@@ -8,12 +8,16 @@ import fa.training.librarymanagementsystem.dto.request.ReturnRequest;
 import fa.training.librarymanagementsystem.entity.*;
 import fa.training.librarymanagementsystem.exception.AlreadyReturnedException;
 import fa.training.librarymanagementsystem.exception.BookNotAvailableException;
+import fa.training.librarymanagementsystem.exception.RenewalNotAllowedException;
 import fa.training.librarymanagementsystem.exception.ResourceNotFoundException;
+import fa.training.librarymanagementsystem.exception.UnpaidFineException;
+import fa.training.librarymanagementsystem.repository.ReservationRepository;
 import fa.training.librarymanagementsystem.repository.BookCopyRepository;
 import fa.training.librarymanagementsystem.repository.BorrowRecordRepository;
 import fa.training.librarymanagementsystem.repository.specification.BorrowRecordSpecification;
 import fa.training.librarymanagementsystem.repository.UserRepository;
 import fa.training.librarymanagementsystem.service.BorrowService;
+import fa.training.librarymanagementsystem.service.FineService;
 import fa.training.librarymanagementsystem.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,12 +41,17 @@ public class BorrowServiceImpl implements BorrowService {
     private final BookCopyRepository bookCopyRepository;
     private final BorrowRecordRepository borrowRecordRepository;
     private final ReservationService reservationService;
+    private final ReservationRepository reservationRepository;
+    private final FineService fineService;
 
     @Value("${app.borrow.period-days:14}")
     private int borrowPeriodDays;
 
     @Value("${app.borrow.fine-per-day:5000}")
     private long finePerDay;
+
+    @Value("${app.borrow.max-renewals:2}")
+    private int maxRenewals;
 
     /**
      * Borrows a book copy for a user.
@@ -54,6 +63,10 @@ public class BorrowServiceImpl implements BorrowService {
     public BorrowRecordResponse borrow(BorrowRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + request.getUserId()));
+
+        if (fineService.hasUnpaidFines(user.getId())) {
+            throw new UnpaidFineException("User " + user.getUsername() + " has unpaid fines. Please settle before borrowing.");
+        }
 
         // Priority: use the RESERVED copy if user has a NOTIFIED reservation; otherwise pick any AVAILABLE copy
         BookCopy copy;
@@ -106,7 +119,14 @@ public class BorrowServiceImpl implements BorrowService {
             record.getBookCopy().setStatus(BookCopy.CopyStatus.AVAILABLE);
         }
 
-        return BorrowRecordResponse.from(borrowRecordRepository.save(record));
+        BorrowRecord saved = borrowRecordRepository.save(record);
+
+        // Create a Fine entity if overdue so admin can track payment status
+        if (saved.getFineAmount() > 0) {
+            fineService.createFine(saved);
+        }
+
+        return BorrowRecordResponse.from(saved);
     }
 
     /**
@@ -149,5 +169,47 @@ public class BorrowServiceImpl implements BorrowService {
                 .map(BorrowRecordResponse::from)
                 .toList();
         return PageResponse.from(page, content);
+    }
+
+    @Override
+    @Transactional
+    public BorrowRecordResponse renewBook(Long borrowRecordId, String requesterUsername) {
+        BorrowRecord record = borrowRecordRepository.findByIdWithDetails(borrowRecordId)
+                .orElseThrow(() -> new ResourceNotFoundException("BorrowRecord not found: " + borrowRecordId));
+
+        User requester = userRepository.findByUsername(requesterUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + requesterUsername));
+
+        // READER can only renew their own record; use 404 to avoid leaking existence to other readers
+        if (requester.getRole() == User.Role.READER
+                && !record.getUser().getId().equals(requester.getId())) {
+            throw new ResourceNotFoundException("BorrowRecord not found: " + borrowRecordId);
+        }
+
+        if (record.getStatus() == BorrowRecord.BorrowStatus.RETURNED) {
+            throw new RenewalNotAllowedException("Cannot renew an already returned record");
+        }
+
+        LocalDate today = LocalDate.now();
+        if (today.isAfter(record.getDueDate())) {
+            throw new RenewalNotAllowedException("Book is overdue — return it and settle any fines before renewing");
+        }
+
+        if (record.getRenewCount() >= maxRenewals) {
+            throw new RenewalNotAllowedException("Maximum renewals (" + maxRenewals + ") reached for this loan");
+        }
+
+        Long bookId = record.getBookCopy().getBook().getId();
+        boolean hasPendingReservation = reservationRepository
+                .findFirstByBookIdAndStatusOrderByReservedAtAsc(bookId, Reservation.ReservationStatus.PENDING)
+                .isPresent();
+        if (hasPendingReservation) {
+            throw new RenewalNotAllowedException("Cannot renew — another user is waiting for this book");
+        }
+
+        record.setDueDate(today.plusDays(borrowPeriodDays));
+        record.setRenewCount(record.getRenewCount() + 1);
+
+        return BorrowRecordResponse.from(borrowRecordRepository.save(record));
     }
 }

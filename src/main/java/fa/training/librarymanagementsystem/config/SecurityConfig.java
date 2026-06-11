@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/books").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/borrow").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/return").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/renew").authenticated()
                         // Reader can view own history; all other borrow-record endpoints are admin-only
                         .requestMatchers("/api/borrow-records/my").authenticated()
                         .requestMatchers("/api/borrow-records/**").hasRole("ADMIN")
@@ -46,6 +47,10 @@ public class SecurityConfig {
                         // Categories: GET open to authenticated; write ops admin-only
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").authenticated()
                         .requestMatchers("/api/categories/**").hasRole("ADMIN")
+                        // Fines: view-own open to authenticated; pay/waive/list-all admin-only
+                        .requestMatchers(HttpMethod.GET, "/api/fines/my-fines").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/fines/my-history").authenticated()
+                        .requestMatchers("/api/fines/**").hasRole("ADMIN")
                         // Reservations: create/view-own/cancel open to authenticated; list-all admin-only
                         .requestMatchers(HttpMethod.POST, "/api/reservations").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/reservations/my").authenticated()

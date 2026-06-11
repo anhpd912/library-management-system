@@ -60,6 +60,20 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("Account is deactivated"));
     }
 
+    /** 402 Payment Required: user has unpaid fines — must settle before borrowing again. */
+    @ExceptionHandler(UnpaidFineException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnpaidFine(UnpaidFineException e) {
+        return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
+                .body(ApiResponse.error(e.getMessage()));
+    }
+
+    /** 409 Conflict: renewal precondition failed (overdue, max renewals, reservation waiting, etc). */
+    @ExceptionHandler(RenewalNotAllowedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRenewalNotAllowed(RenewalNotAllowedException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(e.getMessage()));
+    }
+
     /** 400 Bad Request: invalid state transition (e.g. cancelling a FULFILLED reservation). */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException e) {
