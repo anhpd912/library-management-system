@@ -5,6 +5,7 @@ import fa.training.librarymanagementsystem.dto.response.ApiResponse;
 import fa.training.librarymanagementsystem.dto.response.PageResponse;
 import fa.training.librarymanagementsystem.dto.response.ReservationResponse;
 import fa.training.librarymanagementsystem.service.ReservationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -27,7 +28,7 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<ReservationResponse>> createReservation(
-            @RequestBody CreateReservationRequest request, Authentication auth) {
+            @Valid @RequestBody CreateReservationRequest request, Authentication auth) { // Added @Valid here
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Reservation created",
                         reservationService.createReservation(request, auth.getName())));

@@ -4,6 +4,7 @@ import fa.training.librarymanagementsystem.dto.request.CreateCategoryRequest;
 import fa.training.librarymanagementsystem.dto.response.ApiResponse;
 import fa.training.librarymanagementsystem.dto.response.CategoryResponse;
 import fa.training.librarymanagementsystem.service.CategoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,14 +26,14 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@RequestBody CreateCategoryRequest request) {
+    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody CreateCategoryRequest request) { // Added @Valid here
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Category created", categoryService.createCategory(request)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(
-            @PathVariable Long id, @RequestBody CreateCategoryRequest request) {
+            @PathVariable Long id, @Valid @RequestBody CreateCategoryRequest request) { // Added @Valid here
         return ResponseEntity.ok(ApiResponse.success("Category updated", categoryService.updateCategory(id, request)));
     }
 

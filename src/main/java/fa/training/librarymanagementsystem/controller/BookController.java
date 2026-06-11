@@ -6,6 +6,7 @@ import fa.training.librarymanagementsystem.dto.response.BookResponse;
 import fa.training.librarymanagementsystem.dto.request.CreateBookRequest;
 import fa.training.librarymanagementsystem.dto.response.PageResponse;
 import fa.training.librarymanagementsystem.service.BookService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -22,7 +23,7 @@ public class BookController {
     private final BookService bookService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<BookResponse>> createBook(@RequestBody CreateBookRequest request) {
+    public ResponseEntity<ApiResponse<BookResponse>> createBook(@Valid @RequestBody CreateBookRequest request) { // Added @Valid here
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Book created", bookService.createBook(request)));
     }
