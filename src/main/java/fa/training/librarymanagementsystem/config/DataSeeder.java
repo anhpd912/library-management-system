@@ -26,6 +26,7 @@ public class DataSeeder implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final BorrowRecordRepository borrowRecordRepository;
     private final ReservationRepository reservationRepository;
+    private final FineRepository fineRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -91,13 +92,21 @@ public class DataSeeder implements CommandLineRunner {
         cleanCopyBorrowed2.setStatus(BookCopy.CopyStatus.AVAILABLE);
         bookCopyRepository.save(cleanCopyBorrowed2);
 
-        // reader2 overdue — 5 days past due, 25000 VND fine already persisted by scheduler
-        borrowRecordRepository.save(BorrowRecord.builder()
+        // reader2 overdue — 5 days past due, 25000 VND fine persisted
+        BorrowRecord overdueRecord = borrowRecordRepository.save(BorrowRecord.builder()
                 .user(reader3).bookCopy(cleanCopyBorrowed1)
                 .borrowDate(LocalDate.now().minusDays(19))
                 .dueDate(LocalDate.now().minusDays(5))
-                .status(BorrowRecord.BorrowStatus.BORROWING)
+                .status(BorrowRecord.BorrowStatus.OVERDUE)
                 .fineAmount(25000L)
+                .build());
+
+        // --- Fines ---
+        fineRepository.save(Fine.builder()
+                .borrowRecord(overdueRecord)
+                .amount(25000L)
+                .status(Fine.FineStatus.UNPAID)
+                .createdAt(LocalDate.now())
                 .build());
 
         // --- Reservations ---

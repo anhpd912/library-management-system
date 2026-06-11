@@ -32,14 +32,15 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
     @EntityGraph(attributePaths = {"user", "bookCopy", "bookCopy.book"})
     Page<BorrowRecord> findAll(@Nullable Specification<BorrowRecord> spec, Pageable pageable);
 
-    @Query("SELECT COUNT(r) FROM BorrowRecord r WHERE r.status = 'BORROWING' AND r.dueDate < :today")
+    /** Counts records with status OVERDUE (set by FineScheduler). */
+    @Query("SELECT COUNT(r) FROM BorrowRecord r WHERE r.status = 'OVERDUE'")
     long countOverdue(@Param("today") LocalDate today);
 
-    /** Used by FineScheduler to persist daily fine amounts. */
-    @Query("SELECT r FROM BorrowRecord r WHERE r.status = 'BORROWING' AND r.dueDate < :today")
+    /** Used by FineScheduler: finds BORROWING records newly past dueDate + all existing OVERDUE records. */
+    @Query("SELECT r FROM BorrowRecord r WHERE (r.status = 'BORROWING' OR r.status = 'OVERDUE') AND r.dueDate < :today")
     List<BorrowRecord> findOverdueBorrowing(@Param("today") LocalDate today);
 
-    @Query("SELECT COALESCE(SUM(r.fineAmount), 0) FROM BorrowRecord r WHERE r.status = 'BORROWING' AND r.fineAmount > 0")
+    @Query("SELECT COALESCE(SUM(r.fineAmount), 0) FROM BorrowRecord r WHERE r.status = 'OVERDUE' AND r.fineAmount > 0")
     long sumPendingFines();
 
     @Query("SELECT COALESCE(SUM(r.fineAmount), 0) FROM BorrowRecord r WHERE r.status = 'RETURNED' AND r.fineAmount > 0")
