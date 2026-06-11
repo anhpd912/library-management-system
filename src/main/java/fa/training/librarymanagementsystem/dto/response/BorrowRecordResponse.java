@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 
 @Getter
 @Builder
@@ -19,26 +18,16 @@ public class BorrowRecordResponse {
     private LocalDate dueDate;
     private LocalDate returnDate;
     private BorrowRecord.BorrowStatus status;
+    /** Real-time overdue flag — true if still BORROWING past dueDate. */
     private boolean overdue;
-    /** Fine in VND: 5000/day overdue. 0 if returned on time or still within period. */
+    /** Persisted fine in VND: updated daily by FineScheduler; set at return time for RETURNED records. */
     private long fineAmount;
-
-    private static final long FINE_PER_DAY = 5000L;
 
     public static BorrowRecordResponse from(BorrowRecord record) {
         LocalDate due = record.getDueDate();
-        boolean overdue = false;
-        long fine = 0;
-
-        if (due != null) {
-            if (record.getStatus() == BorrowRecord.BorrowStatus.BORROWING && LocalDate.now().isAfter(due)) {
-                overdue = true;
-                fine = ChronoUnit.DAYS.between(due, LocalDate.now()) * FINE_PER_DAY;
-            } else if (record.getStatus() == BorrowRecord.BorrowStatus.RETURNED
-                    && record.getReturnDate() != null && record.getReturnDate().isAfter(due)) {
-                fine = ChronoUnit.DAYS.between(due, record.getReturnDate()) * FINE_PER_DAY;
-            }
-        }
+        boolean overdue = due != null
+                && record.getStatus() == BorrowRecord.BorrowStatus.BORROWING
+                && LocalDate.now().isAfter(due);
 
         return BorrowRecordResponse.builder()
                 .id(record.getId())
@@ -51,7 +40,7 @@ public class BorrowRecordResponse {
                 .returnDate(record.getReturnDate())
                 .status(record.getStatus())
                 .overdue(overdue)
-                .fineAmount(fine)
+                .fineAmount(record.getFineAmount())
                 .build();
     }
 }

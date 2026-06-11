@@ -14,6 +14,7 @@ import fa.training.librarymanagementsystem.repository.BorrowRecordRepository;
 import fa.training.librarymanagementsystem.repository.specification.BorrowRecordSpecification;
 import fa.training.librarymanagementsystem.repository.UserRepository;
 import fa.training.librarymanagementsystem.service.BorrowService;
+import fa.training.librarymanagementsystem.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -23,7 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 /** Core transaction logic for borrowing, returning, and querying borrow records. */
 @Service
@@ -33,9 +36,13 @@ public class BorrowServiceImpl implements BorrowService {
     private final UserRepository userRepository;
     private final BookCopyRepository bookCopyRepository;
     private final BorrowRecordRepository borrowRecordRepository;
+    private final ReservationService reservationService;
 
     @Value("${app.borrow.period-days:14}")
     private int borrowPeriodDays;
+
+    @Value("${app.borrow.fine-per-day:5000}")
+    private long finePerDay;
 
     /**
      * Borrows a book copy for a user.
@@ -48,9 +55,15 @@ public class BorrowServiceImpl implements BorrowService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + request.getUserId()));
 
-        // Pick any available copy; the specific copy does not matter to the borrower
-        BookCopy copy = bookCopyRepository.findFirstByBookIdAndStatus(request.getBookId(), BookCopy.CopyStatus.AVAILABLE)
-                .orElseThrow(() -> new BookNotAvailableException("No available copy for book id: " + request.getBookId()));
+        // Priority: use the RESERVED copy if user has a NOTIFIED reservation; otherwise pick any AVAILABLE copy
+        BookCopy copy;
+        Optional<BookCopy> reservedCopy = reservationService.fulfillReservation(request.getBookId(), user.getId());
+        if (reservedCopy.isPresent()) {
+            copy = reservedCopy.get();
+        } else {
+            copy = bookCopyRepository.findFirstByBookIdAndStatus(request.getBookId(), BookCopy.CopyStatus.AVAILABLE)
+                    .orElseThrow(() -> new BookNotAvailableException("No available copy for book id: " + request.getBookId()));
+        }
 
         copy.setStatus(BookCopy.CopyStatus.BORROWED);
 
@@ -60,21 +73,15 @@ public class BorrowServiceImpl implements BorrowService {
                 .bookCopy(copy)
                 .borrowDate(today)
                 .dueDate(today.plusDays(borrowPeriodDays))
-                .returnDate(null)
                 .status(BorrowRecord.BorrowStatus.BORROWING)
                 .build();
 
         return BorrowRecordResponse.from(borrowRecordRepository.save(record));
     }
 
-    /**
-     * Processes the return of a borrowed book.
-     * JPA dirty checking propagates the AVAILABLE status on bookCopy without an explicit save call.
-     */
     @Override
     @Transactional
     public BorrowRecordResponse returnBook(ReturnRequest request) {
-        // Use JOIN FETCH query to avoid LazyInitializationException when mapping to DTO
         BorrowRecord record = borrowRecordRepository.findByIdWithDetails(request.getBorrowRecordId())
                 .orElseThrow(() -> new ResourceNotFoundException("BorrowRecord not found: " + request.getBorrowRecordId()));
 
@@ -82,9 +89,22 @@ public class BorrowServiceImpl implements BorrowService {
             throw new AlreadyReturnedException("BorrowRecord " + request.getBorrowRecordId() + " already returned");
         }
 
+        LocalDate today = LocalDate.now();
         record.setStatus(BorrowRecord.BorrowStatus.RETURNED);
-        record.setReturnDate(LocalDate.now());
-        record.getBookCopy().setStatus(BookCopy.CopyStatus.AVAILABLE);
+        record.setReturnDate(today);
+
+        // Persist fine at return time so dashboard sums are accurate
+        LocalDate due = record.getDueDate();
+        if (due != null && today.isAfter(due)) {
+            record.setFineAmount(ChronoUnit.DAYS.between(due, today) * finePerDay);
+        }
+
+        // Check for waiting reservation — if found the copy becomes RESERVED, otherwise AVAILABLE
+        boolean notified = reservationService.notifyReservation(
+                record.getBookCopy().getBook().getId(), record.getBookCopy());
+        if (!notified) {
+            record.getBookCopy().setStatus(BookCopy.CopyStatus.AVAILABLE);
+        }
 
         return BorrowRecordResponse.from(borrowRecordRepository.save(record));
     }

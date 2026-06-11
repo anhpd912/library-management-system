@@ -12,4 +12,6 @@ public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificat
     /** Loads all books with their copies in one query to avoid N+1 when computing available copy counts. */
     @Query("SELECT DISTINCT b FROM Book b LEFT JOIN FETCH b.copies")
     List<Book> findAllWithCopies();
+
+    List<Book> findByCategoriesId(Long categoryId);
 }

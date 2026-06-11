@@ -12,4 +12,5 @@ public class BookFilterRequest {
     private String title;
     private String author;
     private String isbn;
+    private Long categoryId;
 }

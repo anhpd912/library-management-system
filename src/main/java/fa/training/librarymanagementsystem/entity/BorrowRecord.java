@@ -45,6 +45,10 @@ public class BorrowRecord {
     @Column(nullable = false)
     private BorrowStatus status;
 
+    /** Accumulated fine in VND. Updated daily by FineScheduler; set at return time for RETURNED records. */
+    @Column(columnDefinition = "BIGINT DEFAULT 0")
+    private long fineAmount;
+
     public enum BorrowStatus {
         BORROWING, RETURNED
     }

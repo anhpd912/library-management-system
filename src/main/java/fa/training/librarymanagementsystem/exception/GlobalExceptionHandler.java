@@ -60,6 +60,13 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("Account is deactivated"));
     }
 
+    /** 400 Bad Request: invalid state transition (e.g. cancelling a FULFILLED reservation). */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(e.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneral(Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

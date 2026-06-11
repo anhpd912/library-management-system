@@ -36,12 +36,13 @@ public class BookController {
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String author,
             @RequestParam(required = false) String isbn,
+            @RequestParam(required = false) Long categoryId,
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "title") String sort,
             @RequestParam(defaultValue = "asc") String dir) {
 
-        BookFilterRequest filter = new BookFilterRequest(title, author, isbn);
+        BookFilterRequest filter = new BookFilterRequest(title, author, isbn, categoryId);
         Sort.Direction direction = Sort.Direction.fromOptionalString(dir).orElse(Sort.Direction.ASC);
         return ResponseEntity.ok(ApiResponse.success(
                 bookService.getAllBooks(filter, PageRequest.of(page, size, Sort.by(direction, sort)))));

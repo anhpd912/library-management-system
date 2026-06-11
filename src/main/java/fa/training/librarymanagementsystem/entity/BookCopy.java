@@ -27,7 +27,9 @@ public class BookCopy {
     @Column(nullable = false)
     private CopyStatus status;
 
-   public enum CopyStatus {
-        AVAILABLE, BORROWED
+    public enum CopyStatus {
+        AVAILABLE, BORROWED,
+        /** Held for a reservation; 24h window. Released back to AVAILABLE when reservation expires. */
+        RESERVED
     }
 }

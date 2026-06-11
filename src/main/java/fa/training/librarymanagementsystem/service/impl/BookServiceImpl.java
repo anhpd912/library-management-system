@@ -6,8 +6,10 @@ import fa.training.librarymanagementsystem.dto.request.CreateBookRequest;
 import fa.training.librarymanagementsystem.dto.response.PageResponse;
 import fa.training.librarymanagementsystem.entity.Book;
 import fa.training.librarymanagementsystem.entity.BookCopy;
+import fa.training.librarymanagementsystem.entity.Category;
 import fa.training.librarymanagementsystem.repository.BookCopyRepository;
 import fa.training.librarymanagementsystem.repository.BookRepository;
+import fa.training.librarymanagementsystem.repository.CategoryRepository;
 import fa.training.librarymanagementsystem.repository.specification.BookSpecification;
 import fa.training.librarymanagementsystem.service.BookService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /** Manages book catalog operations including copy generation. */
@@ -27,6 +30,7 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
     private final BookCopyRepository bookCopyRepository;
+    private final CategoryRepository categoryRepository;
 
     /**
      * Creates a book and generates the requested number of physical copies.
@@ -35,10 +39,15 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public BookResponse createBook(CreateBookRequest request) {
+        List<Category> categories = request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()
+                ? categoryRepository.findAllById(request.getCategoryIds())
+                : Collections.emptyList();
+
         Book book = Book.builder()
                 .title(request.getTitle())
                 .author(request.getAuthor())
                 .isbn(request.getIsbn())
+                .categories(new ArrayList<>(categories))
                 .build();
         book = bookRepository.save(book);
 
@@ -49,7 +58,6 @@ public class BookServiceImpl implements BookService {
                     .status(BookCopy.CopyStatus.AVAILABLE)
                     .build());
         }
-        // Add saved copies to the in-memory collection so BookResponse.from() counts them correctly
         book.getCopies().addAll(bookCopyRepository.saveAll(copies));
 
         return BookResponse.from(book);
@@ -66,7 +74,8 @@ public class BookServiceImpl implements BookService {
         Specification<Book> spec = Specification
                 .where(BookSpecification.hasTitle(filter.getTitle()))
                 .and(BookSpecification.hasAuthor(filter.getAuthor()))
-                .and(BookSpecification.hasIsbn(filter.getIsbn()));
+                .and(BookSpecification.hasIsbn(filter.getIsbn()))
+                .and(BookSpecification.hasCategory(filter.getCategoryId()));
 
         Page<Book> page = bookRepository.findAll(spec, pageable);
 

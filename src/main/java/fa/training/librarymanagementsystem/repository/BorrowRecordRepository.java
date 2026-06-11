@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long>, JpaSpecificationExecutor<BorrowRecord> {
@@ -33,4 +34,20 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
 
     @Query("SELECT COUNT(r) FROM BorrowRecord r WHERE r.status = 'BORROWING' AND r.dueDate < :today")
     long countOverdue(@Param("today") LocalDate today);
+
+    /** Used by FineScheduler to persist daily fine amounts. */
+    @Query("SELECT r FROM BorrowRecord r WHERE r.status = 'BORROWING' AND r.dueDate < :today")
+    List<BorrowRecord> findOverdueBorrowing(@Param("today") LocalDate today);
+
+    @Query("SELECT COALESCE(SUM(r.fineAmount), 0) FROM BorrowRecord r WHERE r.status = 'BORROWING' AND r.fineAmount > 0")
+    long sumPendingFines();
+
+    @Query("SELECT COALESCE(SUM(r.fineAmount), 0) FROM BorrowRecord r WHERE r.status = 'RETURNED' AND r.fineAmount > 0")
+    long sumCollectedFines();
+
+    /** Returns [bookId, bookTitle, borrowCount] for the top N most borrowed books in the given month/year. */
+    @Query("SELECT bc.book.id, bc.book.title, COUNT(r.id) FROM BorrowRecord r JOIN r.bookCopy bc " +
+           "WHERE MONTH(r.borrowDate) = :month AND YEAR(r.borrowDate) = :year " +
+           "GROUP BY bc.book.id, bc.book.title ORDER BY COUNT(r.id) DESC")
+    List<Object[]> findTopBorrowedBooks(@Param("month") int month, @Param("year") int year, Pageable pageable);
 }

@@ -43,6 +43,14 @@ public class SecurityConfig {
                         .requestMatchers("/api/borrow-records/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
                         .requestMatchers("/api/stats/**").hasRole("ADMIN")
+                        // Categories: GET open to authenticated; write ops admin-only
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**").authenticated()
+                        .requestMatchers("/api/categories/**").hasRole("ADMIN")
+                        // Reservations: create/view-own/cancel open to authenticated; list-all admin-only
+                        .requestMatchers(HttpMethod.POST, "/api/reservations").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/reservations/my").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/reservations/**").authenticated()
+                        .requestMatchers("/api/reservations/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 // Return ApiResponse-shaped JSON instead of Spring's default redirect on 401
