@@ -98,6 +98,8 @@ Paste an access token from `POST /api/auth/login` into the **Authorize** button 
 
 **GET /api/books query params:** `title`, `author`, `isbn`, `categoryId` (partial/exact match), `page` (default 0), `size` (default 10), `sort` (default `title`), `dir` (`asc`/`desc`)
 
+`CreateBookRequest` now requires `price` (VND, replacement cost — charged as fine if a copy is reported lost).
+
 ### Categories
 
 | Method | Path | Auth | Description |
@@ -117,7 +119,9 @@ Paste an access token from `POST /api/auth/login` into the **Authorize** button 
 
 **POST /api/borrow body:** `{ "userId": 1, "bookId": 1 }`
 
-**POST /api/return body:** `{ "borrowRecordId": 1 }`
+**POST /api/return body:** `{ "borrowRecordId": 1, "lost": false, "damageFee": 0 }`
+- `lost: true` → copy → `LOST` status (out of circulation), fine = `book.price`
+- `damageFee` → optional admin-assessed amount (VND), added on top of any late fine
 
 **POST /api/renew body:** `{ "borrowRecordId": 1 }`
 
@@ -160,6 +164,8 @@ When a copy is returned and a `PENDING` reservation exists, the copy is held (`R
 | POST | `/api/fines/{borrowRecordId}/waive` | ADMIN | Waive fine |
 
 Fine statuses: `UNPAID` → `PAID` or `WAIVED`. Users with `UNPAID` fines cannot borrow new books.
+
+Fine reasons: `LATE` (overdue return), `DAMAGE` (admin-assessed `damageFee`), `LOST` (copy reported lost, amount = `book.price`). When a return combines multiple fees, they sum into one `Fine` row with the highest-severity reason (`LOST` > `DAMAGE` > `LATE`).
 
 ### Users
 
@@ -249,6 +255,7 @@ BORROWED  → AVAILABLE  (return, no pending reservation)
 BORROWED  → RESERVED   (return, pending reservation exists)
 RESERVED  → BORROWED   (reserved user borrows)
 RESERVED  → AVAILABLE  (reservation expires after 24h)
+BORROWED  → LOST       (return with lost=true; permanently out of circulation)
 ```
 
 ### Cross-flow Guards
@@ -356,10 +363,10 @@ BorrowRecord ──  Fine
 | Entity | Key fields |
 |---|---|
 | `User` | username, password (BCrypt), role, active |
-| `Book` | title, author, isbn, categories (ManyToMany) |
-| `BookCopy` | book, status (`AVAILABLE`/`BORROWED`/`RESERVED`) |
+| `Book` | title, author, isbn, price, categories (ManyToMany) |
+| `BookCopy` | book, status (`AVAILABLE`/`BORROWED`/`RESERVED`/`LOST`) |
 | `BorrowRecord` | user, bookCopy, borrowDate, dueDate, returnDate, status (`BORROWING`/`OVERDUE`/`RETURNED`), fineAmount, renewCount |
-| `Fine` | borrowRecord (1:1), amount, status (`UNPAID`/`PAID`/`WAIVED`), createdAt, paidAt |
+| `Fine` | borrowRecord (1:1), amount, status (`UNPAID`/`PAID`/`WAIVED`), reason (`LATE`/`DAMAGE`/`LOST`), createdAt, paidAt |
 | `Reservation` | user, book, bookCopy, status (`PENDING`/`NOTIFIED`/`EXPIRED`/`FULFILLED`/`CANCELLED`), expiresAt |
 | `Category` | name (unique), description |
 | `RefreshToken` | user (1:1), token (UUID), expiresAt |
