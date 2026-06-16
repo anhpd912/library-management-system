@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 /** Represents a system user. Role determines which endpoints the user can access. */
+/** Represents a system user. Role determines which endpoints the user can access. */
 @Entity
 @Table(name = "users")
 @Getter

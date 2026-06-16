@@ -106,6 +106,7 @@ public class DataSeeder implements CommandLineRunner {
                 .borrowRecord(overdueRecord)
                 .amount(25000L)
                 .status(Fine.FineStatus.UNPAID)
+                .reason(Fine.FineReason.LATE)
                 .createdAt(LocalDate.now())
                 .build());
 

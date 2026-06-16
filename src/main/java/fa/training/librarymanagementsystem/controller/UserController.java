@@ -5,6 +5,7 @@ import fa.training.librarymanagementsystem.dto.response.ApiResponse;
 import fa.training.librarymanagementsystem.dto.response.PageResponse;
 import fa.training.librarymanagementsystem.dto.response.UserResponse;
 import fa.training.librarymanagementsystem.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -33,7 +34,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody CreateUserRequest request) {
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody CreateUserRequest request) { // Added @Valid here
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("User created", userService.createUser(request)));
     }
