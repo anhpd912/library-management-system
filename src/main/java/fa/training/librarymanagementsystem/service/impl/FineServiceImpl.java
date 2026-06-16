@@ -26,11 +26,12 @@ public class FineServiceImpl implements FineService {
 
     @Override
     @Transactional
-    public void createFine(BorrowRecord record) {
+    public void createFine(BorrowRecord record, Fine.FineReason reason) {
         Fine fine = Fine.builder()
                 .borrowRecord(record)
                 .amount(record.getFineAmount())
                 .status(Fine.FineStatus.UNPAID)
+                .reason(reason)
                 .createdAt(LocalDate.now())
                 .build();
         fineRepository.save(fine);

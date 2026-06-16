@@ -30,6 +30,8 @@ public class BookCopy {
     public enum CopyStatus {
         AVAILABLE, BORROWED,
         /** Held for a reservation; 24h window. Released back to AVAILABLE when reservation expires. */
-        RESERVED
+        RESERVED,
+        /** Reported lost at return time; removed from circulation permanently. */
+        LOST
     }
 }

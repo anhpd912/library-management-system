@@ -106,24 +106,39 @@ public class BorrowServiceImpl implements BorrowService {
         record.setStatus(BorrowRecord.BorrowStatus.RETURNED);
         record.setReturnDate(today);
 
-        // Persist fine at return time so dashboard sums are accurate
-        LocalDate due = record.getDueDate();
-        if (due != null && today.isAfter(due)) {
-            record.setFineAmount(ChronoUnit.DAYS.between(due, today) * finePerDay);
-        }
+        Fine.FineReason reason = null;
 
-        // Check for waiting reservation — if found the copy becomes RESERVED, otherwise AVAILABLE
-        boolean notified = reservationService.notifyReservation(
-                record.getBookCopy().getBook().getId(), record.getBookCopy());
-        if (!notified) {
-            record.getBookCopy().setStatus(BookCopy.CopyStatus.AVAILABLE);
+        if (Boolean.TRUE.equals(request.getLost())) {
+            // Lost copy: removed from circulation permanently, charge full replacement price
+            record.getBookCopy().setStatus(BookCopy.CopyStatus.LOST);
+            record.setFineAmount(record.getBookCopy().getBook().getPrice());
+            reason = Fine.FineReason.LOST;
+        } else {
+            long lateFine = 0;
+            LocalDate due = record.getDueDate();
+            if (due != null && today.isAfter(due)) {
+                lateFine = ChronoUnit.DAYS.between(due, today) * finePerDay;
+            }
+            long damageFine = request.getDamageFee() != null ? request.getDamageFee() : 0;
+            record.setFineAmount(lateFine + damageFine);
+            if (damageFine > 0) {
+                reason = Fine.FineReason.DAMAGE;
+            } else if (lateFine > 0) {
+                reason = Fine.FineReason.LATE;
+            }
+
+            // Check for waiting reservation — if found the copy becomes RESERVED, otherwise AVAILABLE
+            boolean notified = reservationService.notifyReservation(
+                    record.getBookCopy().getBook().getId(), record.getBookCopy());
+            if (!notified) {
+                record.getBookCopy().setStatus(BookCopy.CopyStatus.AVAILABLE);
+            }
         }
 
         BorrowRecord saved = borrowRecordRepository.save(record);
 
-        // Create a Fine entity if overdue so admin can track payment status
         if (saved.getFineAmount() > 0) {
-            fineService.createFine(saved);
+            fineService.createFine(saved, reason);
         }
 
         return BorrowRecordResponse.from(saved);

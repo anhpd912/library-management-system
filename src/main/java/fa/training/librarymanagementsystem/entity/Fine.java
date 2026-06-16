@@ -33,6 +33,11 @@ public class Fine {
     @Column(nullable = false, columnDefinition = "VARCHAR(10)")
     private FineStatus status;
 
+    /** Highest-severity reason when multiple fees are combined (LOST > DAMAGE > LATE). */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(10)")
+    private FineReason reason;
+
     @Column(nullable = false)
     private LocalDate createdAt;
 
@@ -41,5 +46,9 @@ public class Fine {
 
     public enum FineStatus {
         UNPAID, PAID, WAIVED
+    }
+
+    public enum FineReason {
+        LATE, DAMAGE, LOST
     }
 }

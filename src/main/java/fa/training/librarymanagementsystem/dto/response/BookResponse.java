@@ -14,6 +14,7 @@ public class BookResponse {
     private String title;
     private String author;
     private String isbn;
+    private long price;
     private long availableCopies;
     private List<CategoryResponse> categories;
 
@@ -32,6 +33,7 @@ public class BookResponse {
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .isbn(book.getIsbn())
+                .price(book.getPrice())
                 .availableCopies(availableCopies)
                 .categories(book.getCategories().stream().map(CategoryResponse::from).toList())
                 .build();

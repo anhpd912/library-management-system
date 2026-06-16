@@ -9,6 +9,7 @@ public class CreateBookRequest {
     private String title;
     private String author;
     private String isbn;
+    private long price;
     private int numberOfCopies;
     private List<Long> categoryIds;
 }

@@ -47,6 +47,7 @@ public class BookServiceImpl implements BookService {
                 .title(request.getTitle())
                 .author(request.getAuthor())
                 .isbn(request.getIsbn())
+                .price(request.getPrice())
                 .categories(new ArrayList<>(categories))
                 .build();
         book = bookRepository.save(book);

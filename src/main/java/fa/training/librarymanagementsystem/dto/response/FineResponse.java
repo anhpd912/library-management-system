@@ -16,6 +16,7 @@ public class FineResponse {
     private String bookTitle;
     private long amount;
     private Fine.FineStatus status;
+    private Fine.FineReason reason;
     private LocalDate createdAt;
     private LocalDate paidAt;
 
@@ -28,6 +29,7 @@ public class FineResponse {
                 .bookTitle(fine.getBorrowRecord().getBookCopy().getBook().getTitle())
                 .amount(fine.getAmount())
                 .status(fine.getStatus())
+                .reason(fine.getReason())
                 .createdAt(fine.getCreatedAt())
                 .paidAt(fine.getPaidAt())
                 .build();

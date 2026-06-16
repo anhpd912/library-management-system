@@ -31,6 +31,10 @@ public class Book {
 
     private String isbn;
 
+    /** Replacement cost in VND, charged as a fine when a copy is reported lost. */
+    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    private long price;
+
     /** LAZY to avoid loading all copies on every Book query. Use JOIN FETCH when copies are needed. */
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default

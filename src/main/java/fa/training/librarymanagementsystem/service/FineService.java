@@ -11,7 +11,7 @@ import java.util.List;
 public interface FineService {
 
     /** Creates a Fine(UNPAID) linked to the given record. Called only when record.fineAmount > 0. */
-    void createFine(BorrowRecord record);
+    void createFine(BorrowRecord record, Fine.FineReason reason);
 
     /** Returns true if the user has any UNPAID fines. Used to block new borrows. */
     boolean hasUnpaidFines(Long userId);
