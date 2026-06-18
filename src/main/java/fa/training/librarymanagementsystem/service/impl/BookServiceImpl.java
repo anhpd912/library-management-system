@@ -73,8 +73,10 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional(readOnly = true)
     public PageResponse<BookResponse> getAllBooks(BookFilterRequest filter, Pageable pageable) {
+        Specification<Book> isActive = (root, query, cb) -> cb.isTrue(root.get("active"));
         Specification<Book> spec = Specification
-                .where(BookSpecification.hasTitle(filter.getTitle()))
+                .where(isActive)
+                .and(BookSpecification.hasTitle(filter.getTitle()))
                 .and(BookSpecification.hasAuthor(filter.getAuthor()))
                 .and(BookSpecification.hasIsbn(filter.getIsbn()))
                 .and(BookSpecification.hasCategory(filter.getCategoryId()));
@@ -122,7 +124,7 @@ public class BookServiceImpl implements BookService {
     public void deleteBook(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
-        // Consider adding logic to prevent deletion if copies are borrowed
-        bookRepository.delete(book);
+        book.setActive(false);
+        bookRepository.save(book);
     }
 }

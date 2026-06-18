@@ -63,3 +63,16 @@ Wait for app start (port 8080). Seed data auto-loads:
 ---
 
 **Order matters for #6 and #7** — demo overdue/fine before paying it off, so the unpaid-fine-blocks-borrow rule is visible. Dry-run once to confirm seed data IDs match expectations before the live demo.
+### Kịch bản dữ liệu test khi demo
+- **Sách mới (để demo price/lost):**
+  ```json
+  POST /api/books
+  { "title": "The Pragmatic Programmer", "author": "David Thomas", "isbn": "9780135957059",
+    "price": 250000, "numberOfCopies": 2, "categoryIds": [1] }
+  ```
+- **Mượn sách:** `POST /api/borrow { "userId": 2, "bookId": 6 }`
+- **Gia hạn:** `POST /api/renew { "borrowRecordId": <id mới> }`
+- **Trả + báo hư hỏng:** `POST /api/return { "borrowRecordId": <id>, "damageFee": 30000 }`
+- **Trả + báo mất sách:** `POST /api/return { "borrowRecordId": <id khác>, "lost": true }` → fine = 250,000đ
+- **Đặt trước:** `POST /api/reservations { "bookId": 3 }` (Domain-Driven Design chỉ có 1 bản, để admin mượn trước rồi reader2 đặt trước)
+- **Record OVERDUE có sẵn:** reader2 đang mượn Clean Code, quá hạn 5 ngày, fine 25,000đ (UNPAID) — dùng để demo chặn mượn sách mới (402) trước khi thanh toán

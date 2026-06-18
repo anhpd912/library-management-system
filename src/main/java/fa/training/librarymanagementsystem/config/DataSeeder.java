@@ -48,15 +48,15 @@ public class DataSeeder implements CommandLineRunner {
         categoryRepository.save(Category.builder().name("Database & Persistence").description("SQL, NoSQL, ORM best practices").build());
 
         // --- Books (ArrayList required — Hibernate must be able to mutate the collection for ManyToMany) ---
-        Book cleanCode = bookRepository.save(Book.builder().title("Clean Code").author("Robert C. Martin").isbn("9780132350884")
+        Book cleanCode = bookRepository.save(Book.builder().title("Clean Code").author("Robert C. Martin").isbn("9780132350884").price(180000L)
                 .categories(new ArrayList<>(List.of(cleanCodeCat, architectureCat))).build());
-        Book springInAction = bookRepository.save(Book.builder().title("Spring in Action").author("Craig Walls").isbn("9781617294945")
+        Book springInAction = bookRepository.save(Book.builder().title("Spring in Action").author("Craig Walls").isbn("9781617294945").price(220000L)
                 .categories(new ArrayList<>(List.of(frameworkCat))).build());
-        Book ddd = bookRepository.save(Book.builder().title("Domain-Driven Design").author("Eric Evans").isbn("9780321125217")
+        Book ddd = bookRepository.save(Book.builder().title("Domain-Driven Design").author("Eric Evans").isbn("9780321125217").price(260000L)
                 .categories(new ArrayList<>(List.of(architectureCat))).build());
-        Book effectiveJava = bookRepository.save(Book.builder().title("Effective Java").author("Joshua Bloch").isbn("9780134685991")
+        Book effectiveJava = bookRepository.save(Book.builder().title("Effective Java").author("Joshua Bloch").isbn("9780134685991").price(200000L)
                 .categories(new ArrayList<>(List.of(cleanCodeCat))).build());
-        Book designPatterns = bookRepository.save(Book.builder().title("Design Patterns").author("Gang of Four").isbn("9780201633610")
+        Book designPatterns = bookRepository.save(Book.builder().title("Design Patterns").author("Gang of Four").isbn("9780201633610").price(240000L)
                 .categories(new ArrayList<>(List.of(architectureCat, cleanCodeCat))).build());
 
         // --- Copies (save to named variables — used directly below, no findAll needed) ---

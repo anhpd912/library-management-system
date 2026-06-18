@@ -35,6 +35,11 @@ public class Book {
     @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
     private long price;
 
+    /** Soft delete: false hides the book from catalog listing but preserves borrow history. */
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean active = true;
+
     /** LAZY to avoid loading all copies on every Book query. Use JOIN FETCH when copies are needed. */
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
