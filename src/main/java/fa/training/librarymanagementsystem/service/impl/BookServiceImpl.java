@@ -7,6 +7,7 @@ import fa.training.librarymanagementsystem.dto.response.PageResponse;
 import fa.training.librarymanagementsystem.entity.Book;
 import fa.training.librarymanagementsystem.entity.BookCopy;
 import fa.training.librarymanagementsystem.entity.Category;
+import fa.training.librarymanagementsystem.exception.ResourceNotFoundException;
 import fa.training.librarymanagementsystem.repository.BookCopyRepository;
 import fa.training.librarymanagementsystem.repository.BookRepository;
 import fa.training.librarymanagementsystem.repository.CategoryRepository;
@@ -86,5 +87,42 @@ public class BookServiceImpl implements BookService {
                 .toList();
 
         return PageResponse.from(page, content);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BookResponse getBookById(Long id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
+        long availableCopies = bookCopyRepository.countByBookIdAndStatus(id, BookCopy.CopyStatus.AVAILABLE);
+        return BookResponse.from(book, availableCopies);
+    }
+
+    @Override
+    @Transactional
+    public BookResponse updateBook(Long id, CreateBookRequest request) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
+
+        List<Category> categories = request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()
+                ? categoryRepository.findAllById(request.getCategoryIds())
+                : Collections.emptyList();
+
+        book.setTitle(request.getTitle());
+        book.setAuthor(request.getAuthor());
+        book.setIsbn(request.getIsbn());
+        book.setCategories(new ArrayList<>(categories));
+
+        book = bookRepository.save(book);
+        return BookResponse.from(book);
+    }
+
+    @Override
+    @Transactional
+    public void deleteBook(Long id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
+        // Consider adding logic to prevent deletion if copies are borrowed
+        bookRepository.delete(book);
     }
 }

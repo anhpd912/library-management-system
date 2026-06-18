@@ -9,4 +9,7 @@ import org.springframework.data.domain.Pageable;
 public interface BookService {
     BookResponse createBook(CreateBookRequest request);
     PageResponse<BookResponse> getAllBooks(BookFilterRequest filter, Pageable pageable);
+    BookResponse getBookById(Long id);
+    BookResponse updateBook(Long id, CreateBookRequest request);
+    void deleteBook(Long id);
 }

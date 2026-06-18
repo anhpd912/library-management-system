@@ -35,7 +35,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/books").hasRole("ADMIN")
+                        // Books: GET open to authenticated; write ops admin-only
+                        .requestMatchers(HttpMethod.GET, "/api/books/**").authenticated()
+                        .requestMatchers("/api/books/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/borrow").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/return").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/renew").authenticated()
