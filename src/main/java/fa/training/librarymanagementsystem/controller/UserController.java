@@ -1,6 +1,7 @@
 package fa.training.librarymanagementsystem.controller;
 
 import fa.training.librarymanagementsystem.dto.request.CreateUserRequest;
+import fa.training.librarymanagementsystem.dto.request.UpdateUserRequest;
 import fa.training.librarymanagementsystem.dto.response.ApiResponse;
 import fa.training.librarymanagementsystem.dto.response.PageResponse;
 import fa.training.librarymanagementsystem.dto.response.UserResponse;
@@ -34,9 +35,20 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody CreateUserRequest request) { // Added @Valid here
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody CreateUserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("User created", userService.createUser(request)));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(userService.getUserById(id)));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(
+            @PathVariable Long id, @Valid @RequestBody UpdateUserRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("User updated", userService.updateUser(id, request)));
     }
 
     @PatchMapping("/{id}/deactivate")

@@ -26,14 +26,19 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody CreateCategoryRequest request) { // Added @Valid here
+    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Category created", categoryService.createCategory(request)));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(categoryService.getCategoryById(id)));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(
-            @PathVariable Long id, @Valid @RequestBody CreateCategoryRequest request) { // Added @Valid here
+            @PathVariable Long id, @Valid @RequestBody CreateCategoryRequest request) {
         return ResponseEntity.ok(ApiResponse.success("Category updated", categoryService.updateCategory(id, request)));
     }
 

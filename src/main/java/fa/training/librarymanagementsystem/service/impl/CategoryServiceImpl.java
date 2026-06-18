@@ -42,6 +42,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public CategoryResponse getCategoryById(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + id));
+        return CategoryResponse.from(category);
+    }
+
+    @Override
     @Transactional
     public CategoryResponse updateCategory(Long id, CreateCategoryRequest request) {
         Category category = categoryRepository.findById(id)

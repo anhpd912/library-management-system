@@ -26,4 +26,6 @@ public interface FineService {
     FineResponse markAsPaid(Long borrowRecordId);
 
     FineResponse waive(Long borrowRecordId);
+
+    void deleteFine(Long id);
 }

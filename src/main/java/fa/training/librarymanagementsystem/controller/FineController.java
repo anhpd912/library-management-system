@@ -67,4 +67,11 @@ public class FineController {
     public ResponseEntity<ApiResponse<FineResponse>> waive(@PathVariable Long borrowRecordId) {
         return ResponseEntity.ok(ApiResponse.success("Fine waived", fineService.waive(borrowRecordId)));
     }
+
+    /** Admin: delete a fine record. */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteFine(@PathVariable Long id) {
+        fineService.deleteFine(id);
+        return ResponseEntity.ok(ApiResponse.success("Fine deleted", null));
+    }
 }

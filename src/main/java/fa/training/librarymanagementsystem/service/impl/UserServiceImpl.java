@@ -1,6 +1,7 @@
 package fa.training.librarymanagementsystem.service.impl;
 
 import fa.training.librarymanagementsystem.dto.request.CreateUserRequest;
+import fa.training.librarymanagementsystem.dto.request.UpdateUserRequest;
 import fa.training.librarymanagementsystem.dto.response.PageResponse;
 import fa.training.librarymanagementsystem.dto.response.UserResponse;
 import fa.training.librarymanagementsystem.entity.User;
@@ -46,6 +47,23 @@ public class UserServiceImpl implements UserService {
                 .role(request.getRole())
                 .active(true)
                 .build();
+        return UserResponse.from(userRepository.save(user));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + id));
+        return UserResponse.from(user);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateUser(Long id, UpdateUserRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + id));
+        user.setRole(request.getRole());
         return UserResponse.from(userRepository.save(user));
     }
 

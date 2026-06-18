@@ -90,6 +90,15 @@ public class FineServiceImpl implements FineService {
         return FineResponse.from(fineRepository.save(fine));
     }
 
+    @Override
+    @Transactional
+    public void deleteFine(Long id) {
+        if (!fineRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Fine not found: " + id);
+        }
+        fineRepository.deleteById(id);
+    }
+
     private Fine findByBorrowRecordIdOrThrow(Long borrowRecordId) {
         return fineRepository.findByBorrowRecordId(borrowRecordId)
                 .orElseThrow(() -> new ResourceNotFoundException("Fine not found for borrow record: " + borrowRecordId));
